@@ -1,1 +1,30 @@
-node_modules
+# Expo
+.expo/
+.expo-shared/
+dist/
+web-build/
+
+# Dependencies
+node_modules/
+
+# Production / Native Builds
+*.apk
+*.aab
+*.ipa
+
+# Environment variables
+.env
+.env*.local
+
+# Logs and status
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# MacOS / OS generated files
+.DS_Store
+*.pem
+
+# VS Code / IDE settings
+.vscode/
+.idea/

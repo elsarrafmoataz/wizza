@@ -1,3 +1,10 @@
+import { registerGlobals } from "@livekit/react-native";
+
+try {
+  registerGlobals();
+} catch (e) {
+  console.warn("LiveKit already initialized", e);
+}
 import { useMemo, useState } from "react";
 import { router } from "expo-router";
 import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";

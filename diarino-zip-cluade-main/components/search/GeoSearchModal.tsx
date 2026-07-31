@@ -1,10 +1,11 @@
 import { useRef, useState } from "react";
 import { Modal, View, Text, Pressable, StyleSheet, PanResponder, ActivityIndicator, Alert } from "react-native";
-import MapView, { Marker, Circle as MapCircle, Region } from "react-native-maps";
+import { Region } from "react-native-maps";
 import * as Location from "expo-location";
 import Svg, { Path, Circle } from "react-native-svg";
 import { LocationPermissionGate } from "./LocationPermissionGate";
 import { useLanguage } from "../../lib/hooks/useLanguage";
+import { MapPicker } from "./MapPicker";
 
 // ↔ modal-geo-search / geoDraft / useMyCurrentLocation() / applyGeoSearch() /
 // clearGeoSearch() in app-viewer.html. The web version used a Leaflet map
@@ -76,30 +77,13 @@ export function GeoSearchModal({ visible, value, onApply, onClose }: Props) {
             <View style={{ width: 34 }} />
           </View>
 
-          <MapView
-            style={{ flex: 1 }}
-            initialRegion={region}
+          <MapPicker
+            point={point}
             region={region}
-            onRegionChangeComplete={setRegion}
-            onPress={(e) => setPoint({ lat: e.nativeEvent.coordinate.latitude, lng: e.nativeEvent.coordinate.longitude })}
-          >
-            {point && (
-              <>
-                <Marker
-                  coordinate={{ latitude: point.lat, longitude: point.lng }}
-                  draggable
-                  onDragEnd={(e) => setPoint({ lat: e.nativeEvent.coordinate.latitude, lng: e.nativeEvent.coordinate.longitude })}
-                />
-                <MapCircle
-                  center={{ latitude: point.lat, longitude: point.lng }}
-                  radius={radiusKm * 1000}
-                  strokeColor="#22A652"
-                  fillColor="rgba(34,166,82,0.15)"
-                  strokeWidth={2}
-                />
-              </>
-            )}
-          </MapView>
+            radiusKm={radiusKm}
+            onRegionChange={setRegion}
+            onPointChange={setPoint}
+          />
 
           <View style={styles.panel}>
             <Pressable style={styles.locateBtn} onPress={useMyCurrentLocation} disabled={locating}>

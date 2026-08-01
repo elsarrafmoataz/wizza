@@ -1,14 +1,9 @@
-import { registerGlobals } from "@livekit/react-native";
-
-try {
-  registerGlobals();
-} catch (e) {
-  console.warn("LiveKit already initialized", e);
-}
 import { useMemo, useState } from "react";
 import { router } from "expo-router";
 import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
+import { Track } from "livekit-client";
 import {
+  registerGlobals,
   LiveKitRoom,
   useTracks,
   useParticipants,
@@ -17,8 +12,7 @@ import {
   VideoTrack,
   isTrackReference,
   AudioSession,
-} from "@livekit/react-native";
-import { Track } from "livekit-client";
+} from "../../lib/livekit-platform";
 import { useEffect } from "react";
 import Svg, { Path } from "react-native-svg";
 import { PermissionGate } from "../../components/live/PermissionGate";
@@ -29,6 +23,12 @@ import { useCurrentUser } from "../../lib/hooks/useCurrentUser";
 import { useLanguage } from "../../lib/hooks/useLanguage";
 import { addSavedLive } from "../../lib/hooks/useMyContent";
 import { useRef } from "react";
+
+try {
+  registerGlobals();
+} catch (e) {
+  console.warn("LiveKit already initialized", e);
+}
 
 const MAX_TITLE_WORDS = 5; // ↔ mandatory 5-word max broadcast title
 

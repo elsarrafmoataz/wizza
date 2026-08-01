@@ -19,10 +19,16 @@ type AdminDB = {
 };
 
 let db: AdminDB = seedAdminDB();
+let snapshot = db;
 let loaded = false;
 const listeners = new Set<() => void>();
 
+function syncSnapshot() {
+  snapshot = db;
+}
+
 function emit() {
+  syncSnapshot();
   listeners.forEach((l) => l());
 }
 function subscribe(listener: () => void) {
@@ -30,7 +36,7 @@ function subscribe(listener: () => void) {
   return () => listeners.delete(listener);
 }
 function getSnapshot() {
-  return db;
+  return snapshot;
 }
 function persist() {
   AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(db)).catch(() => {});

@@ -38,6 +38,7 @@ export default function CreateListingScreen() {
   const editingAd = usePropertyById(editId);
   const createProperty = useCreateProperty();
   const updateProperty = useUpdateProperty();
+  const [submitting, setSubmitting] = useState(false);
 
   const [purpose, setPurpose] = useState<Purpose | "">("");
   const [type, setType] = useState("");
@@ -61,7 +62,7 @@ export default function CreateListingScreen() {
   const [music, setMusic] = useState("");
   const [phone, setPhone] = useState("");
   const [errors, setErrors] = useState<Set<string>>(new Set());
-  const [submitting, setSubmitting] = useState(false);
+ 
 
   // ↔ editListing() — prefills the same form instead of a separate edit screen.
   useEffect(() => {
@@ -200,26 +201,43 @@ export default function CreateListingScreen() {
         music: music || null,
       };
 
-      // Phone lives on the user's profile row now (shared across all their
-      // listings), not copied onto every property like the old mock seller
-      // object did — keep it in sync with whatever's in the form.
       if (phone.trim()) {
         await supabase.from("profiles").upsert({ id: user.id, phone: phone.trim() });
       }
 
       if (editingAd) {
-        // ↔ editListing()'s save path — keeps id/stats/seller/createdAt as-is.
         await updateProperty.mutateAsync({ id: editingAd.id, patch: adFields });
       } else {
         await createProperty.mutateAsync({ ...adFields, sellerId: user.id });
       }
 
-      router.replace({ pathname: "/(tabs)/account", params: { tab: "ads" } });
+      router.replace("/(tabs)/account?tab=ads");
     } catch (err) {
       Alert.alert(t("تعذر نشر الإعلان"), t("حاول مرة أخرى."));
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (!user) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Pressable style={styles.closeBtn} onPress={() => router.back()} hitSlop={8}>
+            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth={2}><Path d="M18 6L6 18M6 6l12 12" /></Svg>
+          </Pressable>
+          <Text style={styles.headerTitle}>{t("انشر عقارك")}</Text>
+          <View style={{ width: 34 }} />
+        </View>
+        <View style={styles.authRequiredBox}>
+          <Text style={styles.authRequiredTitle}>{t("يجب تسجيل الدخول لنشر إعلان")}</Text>
+          <Text style={styles.authRequiredSubtitle}>{t("سجّل الدخول من أجل مشاركة الإعلان مع المشترين والبائعين.")}</Text>
+          <Pressable style={styles.authRequiredBtn} onPress={() => router.replace("/")}>
+            <Text style={styles.authRequiredBtnText}>{t("تسجيل الدخول")}</Text>
+          </Pressable>
+        </View>
+      </View>
+    );
   }
 
   return (

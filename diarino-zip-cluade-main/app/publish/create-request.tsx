@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { router } from "expo-router";
-import { View, Text, ScrollView, Pressable, StyleSheet } from "react-native";
+import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { FormLabel, FormError, FormInput, ChipRow, HelpBox } from "../../components/publish/FormControls";
 import { ProvinceAutocomplete } from "../../components/publish/ProvinceAutocomplete";
@@ -23,6 +23,7 @@ export default function CreateRequestScreen() {
   const [area, setArea] = useState("");
   const [name, setName] = useState("");
   const [errors, setErrors] = useState<Set<string>>(new Set());
+  const [submitting, setSubmitting] = useState(false);
 
   function validate(): boolean {
     const errs = new Set<string>();
@@ -36,25 +37,52 @@ export default function CreateRequestScreen() {
     return errs.size === 0;
   }
 
-  function submit() {
+  async function submit() {
     if (!validate()) return;
     if (!user) return;
 
-    createRequest.mutate({
-      purpose: purpose as "sale" | "rent",
-      type,
-      province,
-      location: location.trim(),
-      priceMax: price ? Number(price) : 0,
-      area: area || "",
-      rooms: "",
-      baths: "",
-      description: description.trim(),
-      requesterName: name.trim(),
-      requesterId: user.id,
-    });
+    setSubmitting(true);
+    try {
+      await createRequest.mutateAsync({
+        purpose: purpose as "sale" | "rent",
+        type,
+        province,
+        location: location.trim(),
+        priceMax: price ? Number(price) : 0,
+        area: area || "",
+        rooms: "",
+        baths: "",
+        description: description.trim(),
+        requesterName: name.trim(),
+        requesterId: user.id,
+      });
+      router.replace("/(tabs)/account?tab=requests");
+    } catch (err) {
+      Alert.alert(t("تعذر نشر الطلب"), t("حاول مرة أخرى."));
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
-    router.replace({ pathname: "/(tabs)/account", params: { tab: "requests" } });
+  if (!user) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Pressable style={styles.closeBtn} onPress={() => router.back()} hitSlop={8}>
+            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth={2}><Path d="M18 6L6 18M6 6l12 12" /></Svg>
+          </Pressable>
+          <Text style={styles.headerTitle}>{t("اطلب عقارك")}</Text>
+          <View style={{ width: 34 }} />
+        </View>
+        <View style={styles.authRequiredBox}>
+          <Text style={styles.authRequiredTitle}>{t("يجب تسجيل الدخول لنشر طلب")}</Text>
+          <Text style={styles.authRequiredSubtitle}>{t("سجّل الدخول من أجل إتمام النشر ومشاركة طلبك مع البائعين.")}</Text>
+          <Pressable style={styles.authRequiredBtn} onPress={() => router.replace("/")}>          
+            <Text style={styles.authRequiredBtnText}>{t("تسجيل الدخول")}</Text>
+          </Pressable>
+        </View>
+      </View>
+    );
   }
 
   return (
@@ -109,8 +137,12 @@ export default function CreateRequestScreen() {
       </ScrollView>
 
       <View style={styles.submitBar}>
-        <Pressable style={styles.submitBtn} onPress={submit}>
-          <Text style={styles.submitBtnText}>{t("نشر الطلب")}</Text>
+        <Pressable style={[styles.submitBtn, submitting && styles.submitBtnDisabled]} onPress={submit} disabled={submitting}>
+          {submitting ? (
+            <ActivityIndicator color="white" size="small" />
+          ) : (
+            <Text style={styles.submitBtnText}>{t("نشر الطلب")}</Text>
+          )}
         </Pressable>
       </View>
     </View>
@@ -126,4 +158,10 @@ const styles = StyleSheet.create({
   submitBar: { padding: 14, paddingBottom: 26, borderTopWidth: 1, borderTopColor: "#f3f4f6", backgroundColor: "white" },
   submitBtn: { backgroundColor: "#4338CA", borderRadius: 14, paddingVertical: 15, alignItems: "center" },
   submitBtnText: { color: "white", fontWeight: "900", fontSize: 14 },
+  submitBtnDisabled: { backgroundColor: "#8fcaa6" },
+  authRequiredBox: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24 },
+  authRequiredTitle: { fontSize: 18, fontWeight: "900", color: "#111827", textAlign: "center", marginBottom: 8 },
+  authRequiredSubtitle: { fontSize: 14, color: "#6b7280", textAlign: "center", marginBottom: 24 },
+  authRequiredBtn: { backgroundColor: "#22A652", borderRadius: 14, paddingVertical: 14, paddingHorizontal: 28 },
+  authRequiredBtnText: { color: "white", fontSize: 14, fontWeight: "900" },
 });

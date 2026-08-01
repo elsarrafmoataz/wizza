@@ -11,9 +11,15 @@ export type NotifFilter = "all" | "read" | "unread";
 let data: Record<NotifCategory, NotifItem[]> = NOTIF_DATA;
 let activeCat: NotifCategory = "like";
 let filter: NotifFilter = "all";
+let snapshot = { data, activeCat, filter };
 const listeners = new Set<() => void>();
 
+function syncSnapshot() {
+  snapshot = { data, activeCat, filter };
+}
+
 function emit() {
+  syncSnapshot();
   listeners.forEach((l) => l());
 }
 function subscribe(listener: () => void) {
@@ -50,7 +56,7 @@ export function markAllRead() {
 }
 
 function getSnapshot() {
-  return { data, activeCat, filter };
+  return snapshot;
 }
 
 export function useNotifications() {

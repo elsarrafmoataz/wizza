@@ -8,9 +8,15 @@ import { Chat, ChatMessage, INITIAL_CHATS } from "../../data/mock-chats";
 // without prop-drilling through the whole navigation tree.
 
 let chats: Chat[] = INITIAL_CHATS;
+let snapshot: Chat[] = chats;
 const listeners = new Set<() => void>();
 
+function syncSnapshot() {
+  snapshot = chats;
+}
+
 function emit() {
+  syncSnapshot();
   listeners.forEach((l) => l());
 }
 
@@ -20,7 +26,7 @@ function subscribe(listener: () => void) {
 }
 
 function getSnapshot() {
-  return chats;
+  return snapshot;
 }
 
 export function useChats() {

@@ -8,7 +8,7 @@ import {
   VideoTrack,
   isTrackReference,
   AudioSession,
-} from "@livekit/react-native";
+} from "../../lib/livekit-platform";
 import { Track } from "livekit-client";
 import Svg, { Path } from "react-native-svg";
 import { LiveCommentsOverlay } from "../../components/live/LiveCommentsOverlay";

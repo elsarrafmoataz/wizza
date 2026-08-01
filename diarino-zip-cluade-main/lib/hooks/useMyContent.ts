@@ -10,9 +10,15 @@ import { SavedLive } from "../../data/saved-live-types";
 const MAX_PINNED = 3; // ↔ the "الحد الأقصى ٣" check in togglePinLive()
 
 let savedLives: SavedLive[] = [];
+let snapshot = { savedLives };
 const listeners = new Set<() => void>();
 
+function syncSnapshot() {
+  snapshot = { savedLives };
+}
+
 function emit() {
+  syncSnapshot();
   listeners.forEach((l) => l());
 }
 function subscribe(listener: () => void) {
@@ -20,7 +26,7 @@ function subscribe(listener: () => void) {
   return () => listeners.delete(listener);
 }
 function getSnapshot() {
-  return { savedLives };
+  return snapshot;
 }
 
 // ↔ the savedEntry push at the end of endBroadcast()

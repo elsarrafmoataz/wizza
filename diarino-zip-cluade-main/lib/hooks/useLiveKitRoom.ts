@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { useRoomContext } from "@livekit/react-native";
 import { RoomEvent } from "livekit-client";
 import { fetchLiveKitToken, LiveKitConnectionInfo } from "../livekit";
 import { LiveComment } from "../../components/live/LiveCommentsOverlay";
+import { useRoomContext } from "../livekit-platform";
 
 // Fetch the token/url pair BEFORE mounting <LiveKitRoom> — the component
 // needs both up front as props, unlike the web version where getUserMedia
